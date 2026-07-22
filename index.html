@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>黑板 · Blackboard</title>
+<link rel="stylesheet" href="style.css">
+<script type="importmap">
+{ "imports": { "three": "./vendor/three.module.js" } }
+</script>
+</head>
+<body>
+
+<header id="topbar">
+  <div class="brand"><span class="logo">◼</span> 黑板</div>
+
+  <div class="group">
+    <button class="tbtn active" data-tool="pen" title="画笔 (P)">✏️ 画笔</button>
+    <button class="tbtn" data-tool="eraser" title="橡皮 (E)">🧹 橡皮</button>
+    <button class="tbtn" data-tool="select" title="选择/编辑 (V)">⬚ 选择</button>
+    <button class="tbtn" data-tool="ai" title="AI 框选识别:公式/2D 图形/3D 图形 (A)">🤖 AI</button>
+  </div>
+  <span class="sep"></span>
+
+  <div class="group">
+    <div class="menu">
+      <button class="tbtn menu-btn" data-menu="mLines" data-default="╱ 线条 ▾">╱ 线条 ▾</button>
+      <div class="flyout" id="mLines" hidden>
+        <button class="tbtn" data-tool="line" title="直线">╱ 直线</button>
+        <button class="tbtn" data-tool="arrow" title="箭头">➶ 箭头</button>
+        <button class="tbtn" data-tool="blockarrow" title="箭头形">➡ 箭头形</button>
+      </div>
+    </div>
+    <div class="menu">
+      <button class="tbtn menu-btn" data-menu="mShapes" data-default="△ 多边形 ▾">△ 多边形 ▾</button>
+      <div class="flyout" id="mShapes" hidden>
+        <button class="tbtn" data-tool="rect" title="矩形">▭ 矩形</button>
+        <button class="tbtn" data-tool="triangle" title="三角形">△ 三角形</button>
+        <button class="tbtn" data-tool="rtriangle" title="直角三角形">◣ 直角三角形</button>
+        <button class="tbtn" data-tool="isotriangle" title="等腰三角形">▲ 等腰三角形</button>
+        <button class="tbtn" data-tool="parallelogram" title="平行四边形">▱ 平行四边形</button>
+        <button class="tbtn" data-tool="trapezoid" title="梯形">⏢ 梯形</button>
+        <button class="tbtn" data-tool="rhombus" title="菱形">◇ 菱形</button>
+        <button class="tbtn" data-tool="star" title="五角星">☆ 五角星</button>
+        <button class="tbtn" data-tool="cross" title="十字形">✚ 十字形</button>
+        <button class="tbtn" data-tool="polygon" title="多边形(边数可调)">⬠ 多边形</button>
+      </div>
+    </div>
+    <div class="menu">
+      <button class="tbtn menu-btn" data-menu="mCurves" data-default="◯ 曲线 ▾">◯ 曲线 ▾</button>
+      <div class="flyout" id="mCurves" hidden>
+        <button class="tbtn" data-tool="ellipse" title="椭圆/圆">◯ 椭圆</button>
+        <button class="tbtn" data-tool="semicircle" title="半圆">◗ 半圆</button>
+        <button class="tbtn" data-tool="sector" title="扇形">◔ 扇形</button>
+        <button class="tbtn" data-tool="arc" title="圆弧">⌒ 圆弧</button>
+        <button class="tbtn" data-tool="ring" title="圆环">◎ 圆环</button>
+      </div>
+    </div>
+    <input type="number" id="bSides" min="3" max="20" value="5" title="多边形边数" hidden>
+  </div>
+  <span class="sep"></span>
+
+  <div class="group">
+    <input type="color" id="bColor" value="#f5f5f5" title="颜色">
+    <input type="range" id="bWidth" min="1" max="20" value="3" title="粗细" style="width:80px">
+    <select id="bDash" title="线型">
+      <option value="solid">── 实线</option>
+      <option value="dash">╌╌ 虚线</option>
+      <option value="dot">┈┈ 点线</option>
+    </select>
+    <label class="chk"><input type="checkbox" id="bFill"> 填充</label>
+  </div>
+  <span class="sep"></span>
+
+  <div class="group">
+    <button class="tbtn" data-tool="solid" title="3D 图形编辑">🧊 3D</button>
+    <span id="solidPanel" hidden>
+      <select id="sKind" title="几何体类型">
+        <optgroup label="多面体">
+          <option value="cube">立方体</option>
+          <option value="tetra">四面体</option>
+          <option value="octa">八面体</option>
+          <option value="dodeca">十二面体</option>
+          <option value="icosa">二十面体</option>
+        </optgroup>
+        <optgroup label="棱柱">
+          <option value="prism">三棱柱</option>
+          <option value="pentaprism">五棱柱</option>
+          <option value="hexaprism">六棱柱</option>
+        </optgroup>
+        <optgroup label="棱锥">
+          <option value="tripyramid">三棱锥</option>
+          <option value="pyramid">四棱锥</option>
+          <option value="pentapyramid">五棱锥</option>
+        </optgroup>
+        <optgroup label="旋转体">
+          <option value="cylinder">圆柱</option>
+          <option value="cone">圆锥</option>
+          <option value="frustum">圆台</option>
+          <option value="sphere">球</option>
+        </optgroup>
+      </select>
+      <button class="tbtn" id="sAdd" title="添加多面体">＋添加</button>
+      <span class="seg" id="sLevel">
+        <button data-level="object" class="active" title="对象 (1)">对象</button>
+        <button data-level="vertex" title="顶点 (2)">顶点</button>
+        <button data-level="edge" title="边 (3)">边</button>
+      </span>
+      <button class="tbtn" id="sRotate" title="自由旋转;对象级绕自身X/Y/Z轴,顶点级绕选中顶点,边级绕选中边.关闭时Shift+拖动按45°步进">🔄 旋转</button>
+      <span class="seg" id="sAxis" title="旋转轴(绕图形自身坐标轴)">
+        <button data-axis="x" title="绕自身 X 轴(水平)">X</button>
+        <button data-axis="y" class="active" title="绕自身 Y 轴(竖直)">Y</button>
+        <button data-axis="z" title="绕自身 Z 轴(斜 45°)">Z</button>
+      </span>
+      <button class="tbtn" id="sCut" title="切割:点选棱上或曲面上的点(每条棱最多保留最新 2 个,点已选点可移除),≥3 个点出现闪烁虚线预览,再点此按钮或按 Enter 执行,Esc 取消">✂ 切割</button>
+    </span>
+  </div>
+
+  <div class="group">
+    <button class="tbtn" id="btnFunc" title="新增函数图像窗口">📈 函数</button>
+  </div>
+
+  <div class="group" style="margin-left:auto">
+    <button class="tbtn" id="btnUndo" title="撤销 (Ctrl+Z)">↩ 撤销</button>
+    <button class="tbtn" id="btnRedo" title="重做 (Ctrl+Y)">↪ 重做</button>
+    <button class="tbtn danger" id="btnClear" title="清空黑板">🗑 清空</button>
+  </div>
+</header>
+
+<div id="stage">
+  <div id="gl"></div>
+  <canvas id="overlay"></canvas>
+</div>
+
+<div id="toast" hidden></div>
+
+<footer id="hintbar">
+  画笔/图形直接绘制 · 橡皮只擦 2D · 选择:2D/3D 都可点选,拖动移动/角点缩放/顶点改形 · 🤖AI:框选识别公式/图形 · 🧊3D:滚轮缩放 · 🔄+X/Y/Z=绕轴旋转 · Shift+拖动=45°步进 · ✂切割:点棱或曲面上的点,Enter 执行 · 1/2/3 对象/顶点/边 · Delete 删除 · Ctrl+Z 撤销
+</footer>
+
+<script src="api-config.js"></script>
+<script type="module" src="js/main.js"></script>
+</body>
+</html>

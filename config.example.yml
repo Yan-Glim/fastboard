@@ -1,0 +1,8 @@
+# VL 模型配置模板
+# 使用方法: 复制本文件为 config.yml 并填写真实配置
+#   cp config.example.yml config.yml
+# config.yml 已被 .gitignore 忽略,且服务器禁止通过 HTTP 访问,api_key 不会泄漏
+
+base_url: "https://api.openai.com/v1"   # OpenAI 兼容接口地址(不含 /chat/completions)
+api_key: "sk-填你的key"
+model: "gpt-4o"                          # 支持视觉的模型,如 gpt-4o / qwen-vl-max 等
